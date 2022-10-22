@@ -5,6 +5,23 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
+def shift_image(image: np.ndarray, x: float, y: float, wrap: bool = False) -> np.ndarray:
+    """
+    Shift an image in x and y.
+
+    Parameters:
+        image: The image.
+        x: Shift in x.
+        y: Shift in y.
+
+    Returns:
+        The shifted image.
+    """
+    m = np.array([1, 0, x, 0, 1, y], dtype=np.float64).reshape(2, 3)
+    return cv.warpAffine(image, m, image.shape[::-1],
+                         borderMode=cv.BORDER_WRAP if wrap else cv.BORDER_CONSTANT)
+
+
 def resize_with_border(image: np.ndarray, size: tuple) -> np.ndarray:
     """
     Resize an image by adding a zero valued border.
