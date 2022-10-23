@@ -56,7 +56,7 @@ def correlate(image1: np.ndarray, image2: np.ndarray, hanning: bool) -> np.ndarr
     return np.fft.ifft2(cross_spectrum).real
 
 
-def max_location(corr_map: np.ndarray):
+def max_location(corr_map: np.ndarray) -> tuple():
     """
     Compute the max location for the correlation map.
 
@@ -69,8 +69,34 @@ def max_location(corr_map: np.ndarray):
     shifted_corr_map = np.fft.fftshift(corr_map)
     _, _, _, maxloc = cv.minMaxLoc(shifted_corr_map)
 
+    #maxloc = centroid(shifted_corr_map, maxloc)
+
     rows, cols = corr_map.shape
     center_x = cols / 2
     center_y = rows / 2
 
     return center_x - maxloc[0], center_y - maxloc[1]
+
+
+def centroid(corr_map: np.ndarray, center: tuple) -> tuple():
+    rows, cols = corr_map.shape
+    center_x, center_y = center
+    r = 2
+
+    start_x = max(0, center_x - r)
+    end_x = min(cols - 1, center_x + r)
+    start_y = max(0, center_y - r)
+    end_y = min(rows - 1, center_y + r)
+
+    sum = 0.0
+    x_w = 0.0
+    y_w = 0.0
+
+    for y in range(start_y, end_y + 1):
+        for x in range(start_x, end_x + 1):
+            value = corr_map[y, x]
+            sum += value
+            x_w += x * value
+            y_w += y * value
+
+    return x_w / sum, y_w / sum
