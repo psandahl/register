@@ -9,8 +9,7 @@ logger = logging.getLogger(__name__)
 
 def correlate(image1: np.ndarray, image2: np.ndarray, hanning: bool) -> np.ndarray:
     """
-    Perform phase correlation. The resulting corr map will give the
-    relation translation of image2 to image1.
+    Perform phase correlation. Returns the raw correlation map.
 
     Parameters:
         image1: Reference image.
@@ -51,7 +50,27 @@ def correlate(image1: np.ndarray, image2: np.ndarray, hanning: bool) -> np.ndarr
     dft1 = np.fft.fft2(input_image1)
     dft2 = np.fft.fft2(input_image2)
 
-    c = dft2 * dft1.conj()  # This is different compared to cv, I think ...
+    c = dft1 * dft2.conj()
     cross_spectrum = c / np.abs(c)
 
     return np.fft.ifft2(cross_spectrum).real
+
+
+def max_location(corr_map: np.ndarray):
+    """
+    Compute the max location for the correlation map.
+
+    Parameters:
+        corr_map: The correlation map.
+
+    Returns:
+        Tuple (x, y): The shift in x, y of image1 to fit image2.
+    """
+    shifted_corr_map = np.fft.fftshift(corr_map)
+    _, _, _, maxloc = cv.minMaxLoc(shifted_corr_map)
+
+    rows, cols = corr_map.shape
+    center_x = cols / 2
+    center_y = rows / 2
+
+    return center_x - maxloc[0], center_y - maxloc[1]

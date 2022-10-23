@@ -23,29 +23,10 @@ class TestPhase(unittest.TestCase):
         opt_cols = cv.getOptimalDFTSize(cols)
         self.assertEqual((opt_rows, opt_cols), corr_map.shape)
 
-        _, _, _, maxloc = cv.minMaxLoc(corr_map)
-
+        maxloc = phase.max_location(corr_map)
         self.assertEqual((0, 0), maxloc)
 
-    def test_shift_full_image_wrapped(self):
-        image = cv.imread(get_test_path('gulsparv.png'), cv.IMREAD_GRAYSCALE)
-        self.assertIsNotNone(image)
-
-        xt = 40
-        yt = 50
-        image_shifted = util.shift_image(image, xt, yt, True)
-
-        corr_map = phase.correlate(np.float32(
-            image), np.float32(image_shifted), True)
-        _, _, _, maxloc = cv.minMaxLoc(corr_map)
-        self.assertEqual((xt, yt), maxloc)
-
-        corr_map = phase.correlate(np.float32(
-            image), np.float32(image_shifted), False)
-        _, _, _, maxloc = cv.minMaxLoc(corr_map)
-        self.assertEqual((xt, yt), maxloc)
-
-    def test_shift_full_image_non_wrapped(self):
+    def test_shift_full_image_positive(self):
         image = cv.imread(get_test_path('gulsparv.png'), cv.IMREAD_GRAYSCALE)
         self.assertIsNotNone(image)
 
@@ -55,10 +36,42 @@ class TestPhase(unittest.TestCase):
 
         corr_map = phase.correlate(np.float32(
             image), np.float32(image_shifted), True)
-        _, _, _, maxloc = cv.minMaxLoc(corr_map)
+        maxloc = phase.max_location(corr_map)
         self.assertEqual((xt, yt), maxloc)
 
         corr_map = phase.correlate(np.float32(
             image), np.float32(image_shifted), False)
-        _, _, _, maxloc = cv.minMaxLoc(corr_map)
+        maxloc = phase.max_location(corr_map)
         self.assertEqual((xt, yt), maxloc)
+
+    def test_shift_full_image_negative(self):
+        image = cv.imread(get_test_path('gulsparv.png'), cv.IMREAD_GRAYSCALE)
+        self.assertIsNotNone(image)
+
+        xt = -40
+        yt = -50
+        image_shifted = util.shift_image(image, xt, yt)
+
+        corr_map = phase.correlate(np.float32(
+            image), np.float32(image_shifted), True)
+        maxloc = phase.max_location(corr_map)
+        self.assertEqual((xt, yt), maxloc)
+
+        corr_map = phase.correlate(np.float32(
+            image), np.float32(image_shifted), False)
+        maxloc = phase.max_location(corr_map)
+        self.assertEqual((xt, yt), maxloc)
+
+    def test_sub_image(self):
+        image = cv.imread(get_test_path('gulsparv.png'), cv.IMREAD_GRAYSCALE)
+        self.assertIsNotNone(image)
+
+        # Taking a sub image is equal to a negative shift.
+        x = 300
+        y = 200
+        size = 100
+        sub = image[y:y+size, x:x+size]
+
+        corr_map = phase.correlate(np.float32(image), np.float32(sub), True)
+        maxloc = phase.max_location(corr_map)
+        self.assertEqual((-x, -y), maxloc)
