@@ -45,6 +45,40 @@ def resize_with_border(image: np.ndarray, size: tuple) -> np.ndarray:
         cv.BORDER_CONSTANT, value=0.0)
 
 
+def filtered_resize(image: np.ndarray, filter: np.ndarray, opt_size: tuple) -> np.ndarray:
+    """
+    Apply a filter, and a resize if necessary.
+
+    Parameters:
+        image: The image.
+        filter: The filter - can be None.
+        opt_size: Tuple (rows, cols) to adapt to.
+
+    Returns:
+        The resized image.
+    """
+    assert len(image.shape) == 2
+    assert image.dtype == np.float32 or image.dtype == np.float64
+
+    if not filter is None:
+        assert filter.shape == image.shape
+        assert filter.dtype == image.dtype
+
+    rows, cols = image.shape
+    opt_rows, opt_cols = opt_size
+
+    if opt_rows > rows or opt_cols > cols:
+        if not filter is None:
+            return resize_with_border(image * filter, opt_size)
+        else:
+            return resize_with_border(image, opt_size)
+    else:
+        if not filter is None:
+            return image * filter
+        else:
+            return image
+
+
 def log_magnitude_spectrum(image: np.ndarray, hanning: bool) -> np.ndarray:
     """
     Compute the logarithmic magnitude spectrum for an image.
@@ -74,19 +108,7 @@ def log_magnitude_spectrum(image: np.ndarray, hanning: bool) -> np.ndarray:
     logger.debug(
         f'rows={rows} opt_rows={opt_rows} cols={cols} opt_cols={opt_cols}')
 
-    input_image = None
-    if opt_rows > rows or opt_cols > cols:
-        if hanning:
-            input_image = resize_with_border(
-                image * filter, (opt_rows, opt_cols))
-        else:
-            input_image = resize_with_border(image, (opt_rows, opt_cols))
-    else:
-        if hanning:
-            input_image = image * filter
-        else:
-            input_image = image
-
+    input_image = filtered_resize(image, filter, (opt_rows, opt_cols))
     dft = np.fft.fft2(input_image)
 
     magnitude = np.abs(dft)
