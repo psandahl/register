@@ -8,6 +8,18 @@ logger = logging.getLogger(__name__)
 
 
 def correlate(image1: np.ndarray, image2: np.ndarray, hanning: bool) -> np.ndarray:
+    """
+    Perform phase correlation. The resulting corr map will give the
+    relation translation of image2 to image1.
+
+    Parameters:
+        image1: Reference image.
+        image2: Query image.
+        hanning: Flag to tell if images shall have a Hanning window.
+
+    Returns:
+        Correlation map.
+    """
     assert image1.dtype == np.float32 or image1.dtype == np.float64
     assert image1.dtype == image2.dtype
     assert len(image1.shape) == 2 and len(image2.shape) == 2
@@ -39,7 +51,7 @@ def correlate(image1: np.ndarray, image2: np.ndarray, hanning: bool) -> np.ndarr
     dft1 = np.fft.fft2(input_image1)
     dft2 = np.fft.fft2(input_image2)
 
-    c = dft1 * dft2.conj()
+    c = dft2 * dft1.conj()  # This is different compared to cv, I think ...
     cross_spectrum = c / np.abs(c)
 
-    return cross_spectrum.real
+    return np.fft.ifft2(cross_spectrum).real
