@@ -69,16 +69,19 @@ def max_location(corr_map: np.ndarray) -> tuple():
     shifted_corr_map = np.fft.fftshift(corr_map)
     _, _, _, maxloc = cv.minMaxLoc(shifted_corr_map)
 
-    #maxloc = centroid(shifted_corr_map, maxloc)
+    centroid_x, centroid_y = centroid(shifted_corr_map, maxloc)
 
     rows, cols = corr_map.shape
     center_x = cols / 2
     center_y = rows / 2
 
-    return center_x - maxloc[0], center_y - maxloc[1]
+    return center_x - centroid_x, center_y - centroid_y
 
 
 def centroid(corr_map: np.ndarray, center: tuple) -> tuple():
+    """
+    Compute a 5x5 centroid around the given center.
+    """
     rows, cols = corr_map.shape
     center_x, center_y = center
     r = 2
