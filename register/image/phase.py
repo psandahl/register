@@ -56,26 +56,27 @@ def correlate(image1: np.ndarray, image2: np.ndarray, hanning: bool) -> np.ndarr
     return np.fft.ifft2(cross_spectrum).real
 
 
-def max_location(corr_map: np.ndarray) -> tuple():
+def peak_location(corr_map: np.ndarray) -> tuple():
     """
-    Compute the max location for the correlation map.
+    Compute the peak location for the correlation map.
 
     Parameters:
         corr_map: The correlation map.
 
     Returns:
-        Tuple (x, y): The shift in x, y of image1 to fit image2.
+        Tuple (x, y): The shift in x, y of image1 to fit image2. It is
+        therefore inverted compared to raw correlation map.
     """
     shifted_corr_map = np.fft.fftshift(corr_map)
     _, _, _, maxloc = cv.minMaxLoc(shifted_corr_map)
 
-    centroid_x, centroid_y = centroid(shifted_corr_map, maxloc)
+    peak_x, peak_y = centroid(shifted_corr_map, maxloc)
 
     rows, cols = corr_map.shape
     center_x = cols / 2
     center_y = rows / 2
 
-    return center_x - centroid_x, center_y - centroid_y
+    return center_x - peak_x, center_y - peak_y
 
 
 def centroid(corr_map: np.ndarray, center: tuple) -> tuple():

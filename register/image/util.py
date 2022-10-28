@@ -115,3 +115,20 @@ def log_magnitude_spectrum(image: np.ndarray, hanning: bool) -> np.ndarray:
     magnitude = np.fft.fftshift(magnitude)
 
     return np.log(magnitude)
+
+
+def subimage(image: np.ndarray, xstart: int, ystart: int, xsize: int, ysize: int) -> np.ndarray:
+    """
+    Extract a subimage from the image.
+
+    Parameters:
+        image: The image to extract from.
+        xstart: The start x value.
+        ystart: The start y value.
+        xsize: The size in x.
+        ysize: The size in y.
+
+    Returns:
+        The subimage.
+    """
+    return image[ystart:ystart + ysize, xstart:xstart + xsize]

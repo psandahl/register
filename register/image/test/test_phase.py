@@ -23,7 +23,7 @@ class TestPhase(unittest.TestCase):
         opt_cols = cv.getOptimalDFTSize(cols)
         self.assertEqual((opt_rows, opt_cols), corr_map.shape)
 
-        maxloc = phase.max_location(corr_map)
+        maxloc = phase.peak_location(corr_map)
         self.assertEqual((0, 0), maxloc)
 
     def test_shift_full_positive(self):
@@ -36,13 +36,13 @@ class TestPhase(unittest.TestCase):
 
         corr_map = phase.correlate(np.float32(
             image), np.float32(image_shifted), True)
-        maxloc = phase.max_location(corr_map)
+        maxloc = phase.peak_location(corr_map)
         np.testing.assert_array_almost_equal(
             np.array(maxloc), np.array((xt, yt)), 2)
 
         corr_map = phase.correlate(np.float32(
             image), np.float32(image_shifted), False)
-        maxloc = phase.max_location(corr_map)
+        maxloc = phase.peak_location(corr_map)
         np.testing.assert_array_almost_equal(
             np.array(maxloc), np.array((xt, yt)), 2)
 
@@ -56,13 +56,13 @@ class TestPhase(unittest.TestCase):
 
         corr_map = phase.correlate(np.float32(
             image), np.float32(image_shifted), True)
-        maxloc = phase.max_location(corr_map)
+        maxloc = phase.peak_location(corr_map)
         np.testing.assert_array_almost_equal(
             np.array(maxloc), np.array((xt, yt)), 2)
 
         corr_map = phase.correlate(np.float32(
             image), np.float32(image_shifted), False)
-        maxloc = phase.max_location(corr_map)
+        maxloc = phase.peak_location(corr_map)
         np.testing.assert_array_almost_equal(
             np.array(maxloc), np.array((xt, yt)), 2)
 
@@ -76,13 +76,13 @@ class TestPhase(unittest.TestCase):
 
         corr_map = phase.correlate(np.float32(
             image), np.float32(image_shifted), True)
-        maxloc = phase.max_location(corr_map)
+        maxloc = phase.peak_location(corr_map)
         np.testing.assert_array_almost_equal(
             np.array(maxloc), np.array((xt, yt)), 2)
 
         corr_map = phase.correlate(np.float32(
             image), np.float32(image_shifted), False)
-        maxloc = phase.max_location(corr_map)
+        maxloc = phase.peak_location(corr_map)
         np.testing.assert_array_almost_equal(
             np.array(maxloc), np.array((xt, yt)), 2)
 
@@ -94,14 +94,14 @@ class TestPhase(unittest.TestCase):
         x = 300
         y = 200
         size = 100
-        sub = image[y:y+size, x:x+size]
+        sub = util.subimage(image, x, y, size, size)
 
         corr_map = phase.correlate(np.float32(image), np.float32(sub), True)
-        maxloc = phase.max_location(corr_map)
+        maxloc = phase.peak_location(corr_map)
         np.testing.assert_array_almost_equal(
             np.array(maxloc), np.array((-x, -y)), 1)
 
         corr_map = phase.correlate(np.float32(image), np.float32(sub), False)
-        maxloc = phase.max_location(corr_map)
+        maxloc = phase.peak_location(corr_map)
         np.testing.assert_array_almost_equal(
             np.array(maxloc), np.array((-x, -y)), 1)
