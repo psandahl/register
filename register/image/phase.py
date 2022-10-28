@@ -56,27 +56,31 @@ def correlate(image1: np.ndarray, image2: np.ndarray, hanning: bool) -> np.ndarr
     return np.fft.ifft2(cross_spectrum).real
 
 
-def peak_location(corr_map: np.ndarray) -> tuple():
+def peak_location(corr_map: np.ndarray, shifted: bool = False) -> tuple():
     """
     Compute the peak location for the correlation map.
 
     Parameters:
         corr_map: The correlation map.
+        shifted: If set the energy of the corr map is shifted to its center.
+        The response become then compatible with OpenCV. If not set the
+        response is from the raw correlation map.
 
     Returns:
-        Tuple (x, y): The shift in x, y of image1 to fit image2. It is
-        therefore inverted compared to raw correlation map.
+        Tuple (x, y): The shift in x, y. Exact layout depends on shift.
     """
-    shifted_corr_map = np.fft.fftshift(corr_map)
-    _, _, _, maxloc = cv.minMaxLoc(shifted_corr_map)
+    the_corr_map = corr_map if not shifted else np.fft.fftshift(corr_map)
+    _, _, _, maxloc = cv.minMaxLoc(the_corr_map)
 
-    peak_x, peak_y = centroid(shifted_corr_map, maxloc)
+    peak_x, peak_y = centroid(the_corr_map, maxloc)
+    if not shifted:
+        return peak_x, peak_y
+    else:
+        rows, cols = corr_map.shape
+        center_x = cols / 2
+        center_y = rows / 2
 
-    rows, cols = corr_map.shape
-    center_x = cols / 2
-    center_y = rows / 2
-
-    return center_x - peak_x, center_y - peak_y
+        return center_x - peak_x, center_y - peak_y
 
 
 def centroid(corr_map: np.ndarray, center: tuple) -> tuple():

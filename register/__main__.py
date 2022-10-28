@@ -86,13 +86,10 @@ def display_subimage_phase_correlation(path: str, xstart: int, ystart: int, subs
     corr_map = phase.correlate(np.float32(gray_image),
                                np.float32(gray_subimage), hanning)
 
-    # Get the weighted peak value (inverted).
+    # Get the weighted peak value.
     peak_x, peak_y = phase.peak_location(corr_map)
-    peak_x = round(-peak_x)
-    peak_y = round(-peak_y)
-
-    print(peak_x)
-    print(peak_y)
+    peak_x = round(peak_x)
+    peak_y = round(peak_y)
 
     # Draw registration rectangle in green.
     cv.rectangle(image, (peak_x, peak_y), (peak_x +
