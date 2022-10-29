@@ -119,6 +119,26 @@ def display_subimage_phase_correlation(path: str, xstart: int, ystart: int, subs
     plt.show()
 
 
+def display_polar(path: str) -> None:
+    """
+    Display polar transformation
+    """
+    logger.debug(
+        f'display polar transformation path={path}')
+
+    image = cv.imread(path, cv.IMREAD_COLOR)
+    if image is None:
+        logger.error(f'Failed to read image')
+        return None
+
+    polar = util.warp_polar(image)
+    # polar = cv.warpPolar(image, (-1, -1), (1024, 768),
+    #                     1280, flags=cv.WARP_POLAR_LINEAR)
+
+    plt.imshow(polar)
+    plt.show()
+
+
 def main() -> None:
     """
     Entry point for the register execution.
@@ -130,6 +150,8 @@ def main() -> None:
                         help='Display magnitude spectrum for the given image')
     parser.add_argument('--subimage-pcorr', type=str,
                         help='Display phase correlation for subimage')
+    parser.add_argument('--polar', type=str,
+                        help='Display polar transform')
     parser.add_argument('--hanning', action='store_true',
                         help='Apply Hanning window')
     parser.add_argument('--xstart', type=int, default=0,
@@ -155,6 +177,8 @@ def main() -> None:
     elif not args.subimage_pcorr is None:
         display_subimage_phase_correlation(
             args.subimage_pcorr, args.xstart, args.ystart, args.subsize, args.hanning)
+    elif not args.polar is None:
+        display_polar(args.polar)
     else:
         parser.print_help()
 
