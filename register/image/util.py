@@ -6,6 +6,27 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
+def rotate_image(image: np.ndarray, degrees: float) -> np.ndarray:
+    """
+    Rotate an image.
+
+    Parameters:
+        image: The image to be rotated.
+        degrees: The angle to rotate the image with.
+
+    Returns:
+        The warped image.
+    """
+    rows = image.shape[0]
+    cols = image.shape[1]
+
+    center = (cols / 2, rows / 2)
+
+    M = cv.getRotationMatrix2D(center, degrees, 1.0)
+
+    return cv.warpAffine(image, M, (cols, rows))
+
+
 def shift_image(image: np.ndarray, x: float, y: float, wrap: bool = False) -> np.ndarray:
     """
     Shift an image in x and y.
