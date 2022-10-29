@@ -126,16 +126,59 @@ def display_polar(path: str) -> None:
     logger.debug(
         f'display polar transformation path={path}')
 
-    image = cv.imread(path, cv.IMREAD_COLOR)
+    image = cv.imread(path, cv.IMREAD_GRAYSCALE)
     if image is None:
         logger.error(f'Failed to read image')
         return None
 
-    polar = util.warp_polar(image)
-    # polar = cv.warpPolar(image, (-1, -1), (1024, 768),
-    #                     1280, flags=cv.WARP_POLAR_LINEAR)
+    rot_image = util.rotate_image(image, 15)
 
-    plt.imshow(polar)
+    polar = util.warp_polar(image)
+    rot_polar = util.warp_polar(rot_image)
+
+    mag_image = util.log_magnitude_spectrum(np.float32(image), True)
+    mag_rot = util.log_magnitude_spectrum(np.float32(rot_image), True)
+
+    mag_image_polar = util.warp_polar(mag_image)
+    mag_rot_polar = util.warp_polar(mag_rot)
+
+    corr = phase.correlate(mag_image_polar, mag_rot_polar, False)
+    print(phase.peak_location(corr))
+
+    fig = plt.figure("Polar Display")
+
+    sub1 = fig.add_subplot(4, 2, 1)
+    sub1.set_title('Original image')
+    plt.imshow(image, cmap='gray')
+
+    sub2 = fig.add_subplot(4, 2, 2)
+    sub2.set_title('Rotated image')
+    plt.imshow(rot_image, cmap='gray')
+
+    sub3 = fig.add_subplot(4, 2, 3)
+    sub3.set_title('Polar original')
+    plt.imshow(polar, cmap='gray')
+
+    sub4 = fig.add_subplot(4, 2, 4)
+    sub4.set_title('Polar rotated')
+    plt.imshow(rot_polar, cmap='gray')
+
+    sub5 = fig.add_subplot(4, 2, 5)
+    sub5.set_title('Magnitude original')
+    plt.imshow(mag_image, cmap='hot')
+
+    sub6 = fig.add_subplot(4, 2, 6)
+    sub6.set_title('Magnitude rotated')
+    plt.imshow(mag_rot, cmap='hot')
+
+    sub7 = fig.add_subplot(4, 2, 7)
+    sub7.set_title('Magnitude Polar')
+    plt.imshow(mag_image_polar, cmap='gray')
+
+    sub8 = fig.add_subplot(4, 2, 8)
+    sub8.set_title('Magnitude Polar Rotated')
+    plt.imshow(mag_rot_polar, cmap='gray')
+
     plt.show()
 
 
