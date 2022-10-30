@@ -6,12 +6,13 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
-def rotate_image(image: np.ndarray, degrees: float) -> np.ndarray:
+def scale_rotate_image(image: np.ndarray, scale: float, degrees: float) -> np.ndarray:
     """
-    Rotate an image.
+    Scale and rotate an image.
 
     Parameters:
         image: The image to be rotated.
+        scale: The scale factor to apply to the image
         degrees: The angle to rotate the image with.
 
     Returns:
@@ -22,9 +23,9 @@ def rotate_image(image: np.ndarray, degrees: float) -> np.ndarray:
 
     center = (cols / 2, rows / 2)
 
-    M = cv.getRotationMatrix2D(center, degrees, 1.0)
+    M = cv.getRotationMatrix2D(center, degrees, scale)
 
-    return cv.warpAffine(image, M, (cols, rows))
+    return cv.warpAffine(image, M, (cols, rows), borderMode=cv.BORDER_WRAP)
 
 
 def shift_image(image: np.ndarray, x: float, y: float, wrap: bool = False) -> np.ndarray:

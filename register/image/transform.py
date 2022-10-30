@@ -3,6 +3,8 @@ import logging
 import math
 import numpy as np
 
+import register.image.phase as phase
+
 logger = logging.getLogger(__name__)
 
 
@@ -38,3 +40,18 @@ def warp_polar(image: np.ndarray) -> np.ndarray:
     y_map = scales_matrix * sin_matrix + center_y
 
     return cv.remap(image, x_map, y_map, cv.INTER_CUBIC & cv.INTER_MAX, cv.BORDER_CONSTANT)
+
+
+def get_scale_and_rotation(pcorr: np.ndarray) -> tuple():
+    rows, cols = pcorr.shape
+    assert rows == cols
+
+    peak_x, peak_y = phase.peak_location(pcorr, True)
+    rotation = (2.0 * -math.pi) * peak_y / rows
+    rotation = -math.fmod(rotation, 2 * math.pi)
+
+    log_base = math.exp(math.log(rows * 1.1 / 2.0) / rows)
+    scale = math.pow(log_base, peak_x)
+    scale = 1.0 / scale
+
+    return scale, math.degrees(rotation)
