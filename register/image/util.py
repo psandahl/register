@@ -154,38 +154,3 @@ def subimage(image: np.ndarray, xstart: int, ystart: int, xsize: int, ysize: int
         The subimage.
     """
     return image[ystart:ystart + ysize, xstart:xstart + xsize]
-
-
-def warp_polar(image: np.ndarray, degree_factor: int = 3) -> np.ndarray:
-    """
-    Simple and slow polar warp.
-    """
-    rows_src = image.shape[0]
-    cols_src = image.shape[1]
-
-    channels = None if len(image.shape) < 3 else image.shape[2]
-    center = np.array((cols_src / 2, rows_src / 2))
-
-    rows_dst = 360 * degree_factor
-
-    max_radius = np.linalg.norm(np.array((0.0, 0.0)) - center)
-    cols_dst = round(max_radius) + 1
-
-    dst = None
-    if not channels is None:
-        dst = np.zeros((rows_dst, cols_dst, channels), dtype=image.dtype)
-    else:
-        dst = np.zeros((rows_dst, cols_dst), dtype=image.dtype)
-
-    for y in range(0, rows_src):
-        for x in range(0, cols_src):
-            point = np.array((x, y)) - center
-
-            magnitude = np.linalg.norm(point)
-            angle = math.degrees(math.atan2(point[1], point[0]))
-
-            phi = round(magnitude)
-            rho = round(angle * degree_factor)
-            dst[rho, phi] = image[y, x]
-
-    return dst
