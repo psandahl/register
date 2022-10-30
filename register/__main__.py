@@ -119,65 +119,33 @@ def display_subimage_phase_correlation(path: str, xstart: int, ystart: int, subs
     plt.show()
 
 
-def display_polar(path: str) -> None:
-    """
-    Display polar transformation
-    """
-    logger.debug(
-        f'display polar transformation path={path}')
+def display_simple_similarity(path1: str, path2: str) -> None:
+    logger.debug(f'display simple similarity. Template={path1} query={path2}')
 
-    image = cv.imread(path, cv.IMREAD_GRAYSCALE)
-    if image is None:
-        logger.error(f'Failed to read image')
+    template = cv.imread(path1, cv.IMREAD_GRAYSCALE)
+    if template is None:
+        logger.error('Failed to read template image')
         return None
 
-    rot_image = util.rotate_image(image, 15)
+    query = cv.imread(path2, cv.IMREAD_GRAYSCALE)
+    if query is None:
+        logger.error('Failed to read query image')
+        return None
 
-    polar = util.warp_polar(image)
-    rot_polar = util.warp_polar(rot_image)
+    if query.shape > template.shape:
+        logger.error(
+            'The query image must be smaller or equal in size compared to the template')
+        return None
 
-    mag_image = util.log_magnitude_spectrum(np.float32(image), True)
-    mag_rot = util.log_magnitude_spectrum(np.float32(rot_image), True)
+    fig = plt.figure('Similarity')
 
-    mag_image_polar = util.warp_polar(mag_image)
-    mag_rot_polar = util.warp_polar(mag_rot)
+    sub1 = fig.add_subplot(1, 2, 1)
+    sub1.set_title('Template image')
+    plt.imshow(template, cmap='gray')
 
-    corr = phase.correlate(mag_image_polar, mag_rot_polar, False)
-    print(phase.peak_location(corr))
-
-    fig = plt.figure("Polar Display")
-
-    sub1 = fig.add_subplot(4, 2, 1)
-    sub1.set_title('Original image')
-    plt.imshow(image, cmap='gray')
-
-    sub2 = fig.add_subplot(4, 2, 2)
-    sub2.set_title('Rotated image')
-    plt.imshow(rot_image, cmap='gray')
-
-    sub3 = fig.add_subplot(4, 2, 3)
-    sub3.set_title('Polar original')
-    plt.imshow(polar, cmap='gray')
-
-    sub4 = fig.add_subplot(4, 2, 4)
-    sub4.set_title('Polar rotated')
-    plt.imshow(rot_polar, cmap='gray')
-
-    sub5 = fig.add_subplot(4, 2, 5)
-    sub5.set_title('Magnitude original')
-    plt.imshow(mag_image, cmap='hot')
-
-    sub6 = fig.add_subplot(4, 2, 6)
-    sub6.set_title('Magnitude rotated')
-    plt.imshow(mag_rot, cmap='hot')
-
-    sub7 = fig.add_subplot(4, 2, 7)
-    sub7.set_title('Magnitude Polar')
-    plt.imshow(mag_image_polar, cmap='gray')
-
-    sub8 = fig.add_subplot(4, 2, 8)
-    sub8.set_title('Magnitude Polar Rotated')
-    plt.imshow(mag_rot_polar, cmap='gray')
+    sub2 = fig.add_subplot(1, 2, 2)
+    sub2.set_title('Query image')
+    plt.imshow(query, cmap='gray')
 
     plt.show()
 
@@ -193,8 +161,8 @@ def main() -> None:
                         help='Display magnitude spectrum for the given image')
     parser.add_argument('--subimage-pcorr', type=str,
                         help='Display phase correlation for subimage')
-    parser.add_argument('--polar', type=str,
-                        help='Display polar transform')
+    parser.add_argument('--similarity', type=str, nargs=2,
+                        help='Find simple similarity')
     parser.add_argument('--hanning', action='store_true',
                         help='Apply Hanning window')
     parser.add_argument('--xstart', type=int, default=0,
@@ -220,8 +188,8 @@ def main() -> None:
     elif not args.subimage_pcorr is None:
         display_subimage_phase_correlation(
             args.subimage_pcorr, args.xstart, args.ystart, args.subsize, args.hanning)
-    elif not args.polar is None:
-        display_polar(args.polar)
+    elif len(args.similarity) == 2:
+        display_simple_similarity(args.similarity[0], args.similarity[1])
     else:
         parser.print_help()
 
