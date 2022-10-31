@@ -154,9 +154,11 @@ def display_simple_similarity(path1: str, path2: str, hanning: bool) -> None:
     opt_query = util.filtered_resize(
         np.float32(query), hanning_window, (opt_rows, opt_cols))
 
-    # Create power spectrums.
-    template_power_spectrum = util.log_magnitude_spectrum(opt_template, False)
-    query_power_spectrum = util.log_magnitude_spectrum(opt_query, False)
+    # Create power spectrums (todo: apply high pass filter).
+    template_power_spectrum = np.fft.fftshift(
+        np.log(np.abs(np.fft.fft2(opt_template))))
+    query_power_spectrum = np.fft.fftshift(
+        np.log(np.abs(np.fft.fft2(opt_query))))
 
     # Create log polar images from power spectrums.
     template_log_polar = trans.warp_polar(template_power_spectrum)
