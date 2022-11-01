@@ -329,6 +329,15 @@ def display_fmt(path: str, xstart: int, ystart: int, subsize: int, degrees: floa
     scaled_rotated_patch = cv.warpAffine(
         opt_patch, M, (opt_cols, opt_rows), borderMode=cv.BORDER_CONSTANT)
 
+    # Get the translation by phase correlate the adjusted image.
+    pcorr2 = phase.correlate(scaled_rotated_patch, opt_image, False)
+    shift_x, shift_y = phase.peak_location(pcorr2, True)
+    print(f'How to shift query image: x={shift_x} y={shift_y}')
+
+    # Shift patch.
+    shifted_patch = util.shift_image(
+        scaled_rotated_patch, shift_x, shift_y, True)
+
     # Display results.
     fig = plt.figure('FMT')
 
@@ -359,6 +368,10 @@ def display_fmt(path: str, xstart: int, ystart: int, subsize: int, degrees: floa
     sub7 = fig.add_subplot(4, 2, 7)
     sub7.set_title('Scale and rotation adjusted patch')
     plt.imshow(scaled_rotated_patch, cmap='gray')
+
+    sub8 = fig.add_subplot(4, 2, 8)
+    sub8.set_title('Shift adjusted patch')
+    plt.imshow(shifted_patch, cmap='gray')
 
     plt.show()
 
