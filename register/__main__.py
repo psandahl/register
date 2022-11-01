@@ -73,6 +73,30 @@ def display_high_pass_filter(path: str) -> None:
     plt.show()
 
 
+def display_log_polar(path: str) -> None:
+    """
+    Display log polar image.
+    """
+    logger.debug(f'display log polar image using path={path}')
+
+    image = cv.imread(path, cv.IMREAD_GRAYSCALE)
+    if image is None:
+        logger.error('Failed to read image')
+        return None
+
+    fig = plt.figure('Log Polar Image')
+
+    sub1 = fig.add_subplot(1, 2, 1)
+    sub1.set_title('Original Image')
+    plt.imshow(image, cmap='gray')
+
+    sub2 = fig.add_subplot(1, 2, 2)
+    sub2.set_title('Log Polar Image')
+    plt.imshow(trans.warp_polar(image), cmap='gray')
+
+    plt.show()
+
+
 def display_magnitude_spectrum(path: str, hanning: bool) -> None:
     """
     Display the magnitude spectrum for an image.
@@ -385,6 +409,8 @@ def main() -> None:
                         help='set the effective log level (DEBUG, INFO, WARNING or ERROR)')
     parser.add_argument('--high-pass-filter', type=str,
                         help='Display high pass filter with an image')
+    parser.add_argument('--log-polar', type=str,
+                        help='Display log polar image')
     parser.add_argument('--magnitude-spectrum', type=str,
                         help='Display magnitude spectrum for the given image')
     parser.add_argument('--subimage-pcorr', type=str,
@@ -419,6 +445,8 @@ def main() -> None:
 
     if not args.high_pass_filter is None:
         display_high_pass_filter(args.high_pass_filter)
+    elif not args.log_polar is None:
+        display_log_polar(args.log_polar)
     elif not args.magnitude_spectrum is None:
         display_magnitude_spectrum(args.magnitude_spectrum, args.hanning)
     elif not args.subimage_pcorr is None:
