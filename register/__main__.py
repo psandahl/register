@@ -193,15 +193,16 @@ def display_simple_similarity(path1: str, path2: str, hanning: bool) -> None:
     opt_query = util.filtered_resize(
         np.float32(query), hanning_window, (opt_rows, opt_cols))
 
+    filter = util.high_pass_filter(opt_rows, opt_cols)
+
     # Create power spectrums (todo: apply high pass filter).
     template_power_spectrum = np.fft.fftshift(
-        np.log(np.abs(np.fft.fft2(opt_template))))
-    query_power_spectrum = np.fft.fftshift(
-        np.log(np.abs(np.fft.fft2(opt_query))))
+        np.abs(np.fft.fft2(opt_template)))
+    query_power_spectrum = np.fft.fftshift(np.abs(np.fft.fft2(opt_query)))
 
     # Create log polar images from power spectrums.
-    template_log_polar = trans.warp_polar(template_power_spectrum)
-    query_log_polar = trans.warp_polar(query_power_spectrum)
+    template_log_polar = trans.warp_polar(template_power_spectrum * filter)
+    query_log_polar = trans.warp_polar(query_power_spectrum * filter)
 
     # Phase correlate the log polar images.
     pcorr1 = phase.correlate(query_log_polar, template_log_polar, False)
@@ -232,12 +233,12 @@ def display_simple_similarity(path1: str, path2: str, hanning: bool) -> None:
     plt.imshow(opt_query, cmap='gray')
 
     sub3 = fig.add_subplot(5, 2, 3)
-    sub3.set_title('Template image power spectrum')
-    plt.imshow(template_power_spectrum, cmap='hot')
+    sub3.set_title('Template image power spectrum (log)')
+    plt.imshow(np.log(template_power_spectrum), cmap='hot')
 
     sub4 = fig.add_subplot(5, 2, 4)
-    sub4.set_title('Query image power spectrum')
-    plt.imshow(query_power_spectrum, cmap='hot')
+    sub4.set_title('Query image power spectrum (log)')
+    plt.imshow(np.log(query_power_spectrum), cmap='hot')
 
     sub5 = fig.add_subplot(5, 2, 5)
     sub5.set_title('Template image power spectrum - log polar')
