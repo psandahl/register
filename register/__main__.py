@@ -54,7 +54,7 @@ def display_high_pass_filter(path: str) -> None:
     opt_image = util.filtered_resize(
         np.float32(image), None, (opt_rows, opt_cols))
     dft_image = np.fft.fftshift(np.fft.fft2(opt_image))
-    filtered_image = np.abs(np.fft.ifft2(np.fft.ifftshift(dft_image * filter)))
+    filtered_image = np.fft.ifft2(np.fft.ifftshift(dft_image * filter)).real
 
     fig = plt.figure('High Pass Filter')
 
@@ -195,7 +195,7 @@ def display_simple_similarity(path1: str, path2: str, hanning: bool) -> None:
 
     filter = util.high_pass_filter(opt_rows, opt_cols)
 
-    # Create power spectrums (todo: apply high pass filter).
+    # Create power spectrums.
     template_power_spectrum = np.fft.fftshift(
         np.abs(np.fft.fft2(opt_template)))
     query_power_spectrum = np.fft.fftshift(np.abs(np.fft.fft2(opt_query)))
