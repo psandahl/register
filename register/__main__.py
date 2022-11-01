@@ -34,6 +34,45 @@ def setup_logging() -> None:
     logger.addHandler(handler)
 
 
+def display_high_pass_filter(path: str) -> None:
+    """
+    Display high pass filter, and apply it to an image.
+    """
+    logger.debug(f'display high pass filter using path={path}')
+
+    image = cv.imread(path, cv.IMREAD_GRAYSCALE)
+    if image is None:
+        logger.error('Failed to read image')
+        return None
+
+    # Get optimal size for FFT.
+    opt_rows = cv.getOptimalDFTSize(image.shape[0])
+    opt_cols = cv.getOptimalDFTSize(image.shape[1])
+
+    filter = util.high_pass_filter(opt_rows, opt_cols)
+
+    opt_image = util.filtered_resize(
+        np.float32(image), None, (opt_rows, opt_cols))
+    dft_image = np.fft.fftshift(np.fft.fft2(opt_image))
+    filtered_image = np.abs(np.fft.ifft2(np.fft.ifftshift(dft_image * filter)))
+
+    fig = plt.figure('High Pass Filter')
+
+    sub1 = fig.add_subplot(1, 3, 1)
+    sub1.set_title('Freq domain filter')
+    plt.imshow(filter, cmap='gray')
+
+    sub2 = fig.add_subplot(1, 3, 2)
+    sub2.set_title('Original image')
+    plt.imshow(image, cmap='gray')
+
+    sub3 = fig.add_subplot(1, 3, 3)
+    sub3.set_title('Filtered image')
+    plt.imshow(filtered_image, cmap='gray')
+
+    plt.show()
+
+
 def display_magnitude_spectrum(path: str, hanning: bool) -> None:
     """
     Display the magnitude spectrum for an image.
@@ -234,6 +273,8 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument('-l', '--log',
                         help='set the effective log level (DEBUG, INFO, WARNING or ERROR)')
+    parser.add_argument('--high-pass-filter', type=str,
+                        help='Display high pass filter with an image')
     parser.add_argument('--magnitude-spectrum', type=str,
                         help='Display magnitude spectrum for the given image')
     parser.add_argument('--subimage-pcorr', type=str,
@@ -260,7 +301,9 @@ def main() -> None:
             parser.print_help()
             sys.exit(1)
 
-    if not args.magnitude_spectrum is None:
+    if not args.high_pass_filter is None:
+        display_high_pass_filter(args.high_pass_filter)
+    elif not args.magnitude_spectrum is None:
         display_magnitude_spectrum(args.magnitude_spectrum, args.hanning)
     elif not args.subimage_pcorr is None:
         display_subimage_phase_correlation(

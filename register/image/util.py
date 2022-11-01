@@ -155,3 +155,23 @@ def subimage(image: np.ndarray, xstart: int, ystart: int, xsize: int, ysize: int
         The subimage.
     """
     return image[ystart:ystart + ysize, xstart:xstart + xsize]
+
+
+def high_pass_filter(rows: int, cols: int) -> np.ndarray:
+    ys = np.linspace(-math.pi / 2.0, math.pi / 2.0, rows,
+                     dtype=np.float32).reshape(rows, 1)
+    y_ones = np.ones(cols, dtype=np.float32).reshape(cols, 1)
+    y_matrix = ys @ y_ones.T
+
+    xs = np.linspace(-math.pi / 2.0, math.pi / 2.0, cols,
+                     dtype=np.float32).reshape(cols, 1)
+    x_ones = np.ones(rows, dtype=np.float32).reshape(rows, 1)
+    x_matrix = x_ones @ xs.T
+
+    matrix = y_matrix * y_matrix + x_matrix * x_matrix
+    filter = np.cos(np.sqrt(matrix))
+
+    filter *= filter
+    filter = -filter + 1.0
+
+    return filter
